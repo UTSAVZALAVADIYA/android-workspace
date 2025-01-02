@@ -1,21 +1,25 @@
-fun main()
-{
-    var a=1
-    var sum=0
+
+Serialization & deserialization
+Exception Handling
 
 
-    while(a<=100)
-    {
-        if(a%2==0)
+Thread : Thread is used to handle processes
 
-        {
-            sum+=a
+How you can use the Thread?
+1)class:Collection of object or collection of data members or function
+2)interface : it's a collection of abstract methods
 
-        }
-        a++
 
-    }
+class :Thread
 
-    print("sum of all even number:")
-    print(sum)
-}
+Thread Lifecycle
+1)init
+2)start
+3)run
+4)stop
+5)destroy
+
+
+interface : Runnable
+
+synchronization in thread
