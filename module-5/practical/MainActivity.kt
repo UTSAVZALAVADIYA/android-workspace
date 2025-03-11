@@ -1,48 +1,56 @@
-package com.example.note
 
+package com.example.myapplication
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.myapplication.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity()
-{
-    lateinit var f1:FloatingActionButton
-    lateinit var recyclerView: RecyclerView
-    lateinit var list:MutableList<Note>
-    lateinit var db:MyDbClass
+class MainActivity : AppCompatActivity() {
 
-    @SuppressLint("MissingInflatedId")
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    private lateinit var binding: ActivityMainBinding
+    lateinit var db: DatabaseClass
+    lateinit var list: MutableList<User>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        enableEdgeToEdge()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
-        f1 = findViewById(R.id.f1)
-        recyclerView = findViewById(R.id.recycler)
+
+        db = Room.databaseBuilder(applicationContext, DatabaseClass::class.java, "NoteAppDatabase").allowMainThreadQueries().build()
         list = ArrayList()
 
-        db = Room.databaseBuilder(applicationContext, MyDbClass::class.java, "notesDatabase")
-            .allowMainThreadQueries()
-            .build()
+        var rm: RecyclerView.LayoutManager = LinearLayoutManager(this)
+        binding.recycler.layoutManager = rm
 
-        list = db.daoClass().viewdata()
+        list = db.daoclass().viewdata()
 
+        var adapter = MyAdapter(applicationContext,list)
+        binding.recycler.adapter = adapter
 
-        var adapter = MyAdapter(applicationContext, list)
-        recyclerView.adapter = adapter
-        var layoutmanager : RecyclerView.LayoutManager = LinearLayoutManager(this)
-        recyclerView.layoutManager = layoutmanager
+        binding.f1.setOnClickListener {
 
-
-        f1.setOnClickListener {
-            startActivity(Intent(applicationContext, add_note::class.java))
+            startActivity(Intent(applicationContext,actyvity_addnote::class.java))
         }
+
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
     }
 }

@@ -1,23 +1,26 @@
-package com.example.note
 
+package com.example.myapplication
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 
 @Dao
+
 interface MyDao
 {
     @Insert
-    fun insertdata(note: Note)
+    fun insertdata(user: User)
 
-    @Query("select * from notes")
-    fun viewdata(): MutableList<Note>
-
-    @Query("delete from notes where id=:id")
-    fun deletedata(id:Int)
+    @Query("select * from users")
+    fun viewdata():MutableList<User>
 
     @Update
-    fun updatedata(note: Note)
+    fun updatedata(user: User)
+
+    @Delete
+    fun deletedata(user: User)
+
 }

@@ -1,4 +1,5 @@
-package com.example.note
+
+package com.example.myapplication
 
 import android.content.Context
 import android.content.DialogInterface
@@ -7,17 +8,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 
-class MyAdapter(var context: Context, var list:MutableList<Note>) : RecyclerView.Adapter<MyView>()
+class MyAdapter(var context: Context,var list:MutableList<User>) : RecyclerView.Adapter<Myview>()
 {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyView
+    lateinit var db:DatabaseClass
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Myview
     {
         var inflater = LayoutInflater.from(parent.context)
-        var view = inflater.inflate(R.layout.design, parent, false)
-        return MyView(view)
+        var view = inflater.inflate(R.layout.design,parent,false)
+
+        db = Room.databaseBuilder(parent.context, DatabaseClass::class.java, "NoteAppDatabase").allowMainThreadQueries().build()
+
+        return Myview(view)
     }
 
     override fun getItemCount(): Int
@@ -25,45 +32,62 @@ class MyAdapter(var context: Context, var list:MutableList<Note>) : RecyclerView
         return list.size
     }
 
-    override fun onBindViewHolder(holder: MyView, position: Int)
+    override fun onBindViewHolder(holder: Myview, position: Int)
     {
-        holder.txt1.text = list[position].title
-        holder.txt2.text = list[position].description
+        holder.txt1.setText(list.get(position).title)
+        holder.txt2.setText(list.get(position).content)
 
         holder.itemView.setOnClickListener {
 
             var alert = AlertDialog.Builder(holder.itemView.context)
-            alert.setTitle("Select Operation")
-            alert.setPositiveButton("Update") { dialogInterface: DialogInterface, i: Int ->
-                var intent = Intent(context, update_note::class.java)
-                intent.putExtra("id", list[position].id)
-                intent.putExtra("title", list[position].title)
-                intent.putExtra("description", list[position].description)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
-            }
-            alert.setNegativeButton("Delete") { dialogInterface: DialogInterface, i: Int ->
-                var db = Room.databaseBuilder(context, MyDbClass::class.java, "notesDatabase")
-                    .allowMainThreadQueries()
-                    .build()
 
-                db.daoClass().deletedata(list[position].id)
-                list.removeAt(position)
-                notifyDataSetChanged()
-            }
+            alert.setTitle("Select Operations?")
+
+            alert.setPositiveButton("Update",{ dialogInterface: DialogInterface, i: Int ->
+
+                GlobalVariables.id = list.get(position).id
+                GlobalVariables.title = list.get(position).title
+                GlobalVariables.content = list.get(position).content
+                GlobalVariables.updateflag = "update"
+
+                var i = Intent(context, actyvity_addnote::class.java)
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context!!.startActivity(i)
+
+            })
+
+            alert.setNegativeButton("Delete",{ dialogInterface: DialogInterface, i: Int ->
+
+                deleteuser(list.get(position).id)
+                var i = Intent(context, MainActivity::class.java)
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(i)
+
+            })
+
             alert.show()
         }
     }
-}
 
-class MyView(itemView: View) : RecyclerView.ViewHolder(itemView)
+    fun deleteuser(id: Int)
+    {
+        val user = User()
+        user.id = id
+        db.daoclass().deletedata(user)
+        Toast.makeText(context, "Note Deleted..!!", Toast.LENGTH_SHORT).show()
+
+    }
+
+}
+class Myview(itemview: View) : RecyclerView.ViewHolder(itemview)
 {
-    var txt1: TextView
-    var txt2: TextView
+    var txt1:TextView
+    var txt2:TextView
 
     init
     {
-        txt1 = itemView.findViewById(R.id.title)
-        txt2 = itemView.findViewById(R.id.description)
+        txt1 = itemview.findViewById(R.id.edt1)
+        txt2 = itemview.findViewById(R.id.edt2)
     }
+
 }
